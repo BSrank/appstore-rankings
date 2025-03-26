@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Store Rankings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .loading {
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Класиране на приложения в App Store</h1>
+    <div id="rankings">
+        <p class="loading">Зареждане...</p>
+    </div>
+
+    <script>
+        // Примерен JavaScript, който ще извлече ранговете
+        async function fetchRankingData() {
+            // Тук ще добавим логика за скрапинг/извличане на данни
+            // Пример: Ще използваме фиктивни данни за тест
+            const rankings = {
+                "Coinbase": { "financeRank": 1, "overallRank": 5 },
+                "Binance": { "financeRank": 2, "overallRank": 10 },
+                "Bybit": { "financeRank": 3, "overallRank": 15 }
+            };
+
+            // Обновяваме страницата с данните
+            document.querySelector('.loading').style.display = 'none';
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Приложение</th>
+                            <th>Ранк във "Финанси"</th>
+                            <th>Ранк сред всички</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Coinbase</td>
+                            <td>${rankings.Coinbase.financeRank}</td>
+                            <td>${rankings.Coinbase.overallRank}</td>
+                        </tr>
+                        <tr>
+                            <td>Binance</td>
+                            <td>${rankings.Binance.financeRank}</td>
+                            <td>${rankings.Binance.overallRank}</td>
+                        </tr>
+                        <tr>
+                            <td>Bybit</td>
+                            <td>${rankings.Bybit.financeRank}</td>
+                            <td>${rankings.Bybit.overallRank}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('rankings').innerHTML = table;
+        }
+
+        // Зареждаме данните при отваряне на сайта
+        window.onload = fetchRankingData;
+    </script>
+</body>
+</html>
