@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coinbase Класация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .rank {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Coinbase Класация в Реално Време</h2>
+        <div class="rank">
+            <p>App Store (Финанси): <span id="appStoreRank">Зареждане...</span></p>
+            <p>Google Play Store (Финанси): <span id="playStoreRank">Зареждане...</span></p>
+        </div>
+        <p>Рефрешни страницата за актуални данни.</p>
+    </div>
+
+    <script>
+        async function getCoinbaseRankings() {
+            try {
+                const corsProxy = 'https://api.allorigins.win/get?url=';
+                const appStoreUrl = corsProxy + encodeURIComponent('https://www.appbrain.com/stats/appstore-rankings/top_free/finance/us');
+                const playStoreUrl = corsProxy + encodeURIComponent('https://www.appbrain.com/stats/google-play-rankings/top_free/finance/us');
+
+                // Създаване на User-Agent заглавка
+                const headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+                };
+
+                // App Store
+                const appStoreResponse = await fetch(appStoreUrl, { headers });
+                if (!appStoreResponse.ok) throw new Error(`App Store заявка неуспешна: ${appStoreResponse.status}`);
+                const appStoreData = await appStoreResponse.json();
+                console.log('App Store Data:', appStoreData);  // Печатаме целия отговор от проксито
+                const appStoreText = appStoreData.contents;
+
+                // Проверка на текста от App Store
+                console.log('App Store HTML:', appStoreText);  // Печатаме целия HTML отговор
+
+                const appStoreDoc = new DOMParser().parseFromString(appStoreText, 'text/html');
+                const appStoreRows = appStoreDoc.querySelectorAll('table.table-ranking tbody tr');
+                let appStoreRank = 'Не е намерено';
+
+                // Печатаме първите 5 реда на резултатите за дебъгване
+                appStoreRows.forEach((row, index) => {
+                    const appLink = row.querySelector('a[href*="/app/"]');
+                    const appName = appLink?.textContent.trim();
+                    console.log(`App Store Row ${index + 1}:`, appName);  // Печатаме името на всяко приложение
+                    if (appName && appName.toLowerCase().includes('coinbase: buy btc, eth, sol')) {
+                        appStoreRank = index + 1;
+                    }
+                });
+                document.getElementById('appStoreRank').innerText = appStoreRank;
+
+                // Google Play Store
+                const playStoreResponse = await fetch(playStoreUrl, { headers });
+                if (!playStoreResponse.ok) throw new Error(`Play Store заявка неуспешна: ${playStoreResponse.status}`);
+                const playStoreData = await playStoreResponse.json();
+                console.log('Play Store Data:', playStoreData);  // Печатаме отговора от проксито
+                const playStoreText = playStoreData.contents;
+
+                // Проверка на текста от Google Play Store
+                console.log('Play Store HTML:', playStoreText);  // Печатаме целия HTML отговор
+
+                const playStoreDoc = new DOMParser().parseFromString(playStoreText, 'text/html');
+                const playStoreRows = playStoreDoc.querySelectorAll('table.table-ranking tbody tr');
+                let playStoreRank = 'Не е намерено';
+
+                // Печатаме първите 5 реда на резултатите за дебъгване
+                playStoreRows.forEach((row, index) => {
+                    const appLink = row.querySelector('a[href*="/app/"]');
+                    const appName = appLink?.textContent.trim();
+                    console.log(`Play Store Row ${index + 1}:`, appName);  // Печатаме името на всяко приложение
+                    if (appName && appName.toLowerCase().includes('coinbase: buy btc, eth, sol')) {
+                        playStoreRank = index + 1;
+                    }
+                });
+                document.getElementById('playStoreRank').innerText = playStoreRank;
+
+            } catch (error) {
+                console.error('Грешка:', error);
+                document.getElementById('appStoreRank').innerText = 'Грешка: ' + error.message;
+                document.getElementById('playStoreRank').innerText = 'Грешка: ' + error.message;
+            }
+        }
+
+        window.onload = getCoinbaseRankings;
+    </script>
+</body>
+</html>
