@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coinbase Класация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .rank {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Coinbase Класация в Реално Време</h2>
+        <div class="rank">
+            <p>App Store (Финанси): <span id="appStoreRank">Зареждане...</span></p>
+            <p>Google Play Store (Финанси): <span id="playStoreRank">Зареждане...</span></p>
+        </div>
+        <p>Рефрешни страницата за актуални данни.</p>
+    </div>
+
+    <script>
+        async function getCoinbaseRankings() {
+            try {
+                const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+                const appStoreUrl = corsProxy + 'https://www.appbrain.com/stats/appstore-rankings/top_free/finance/us';
+                const playStoreUrl = corsProxy + 'https://www.appbrain.com/stats/google-play-rankings/top_free/finance/us';
+
+                // App Store
+                console.log('Опит за заявка към App Store...');
+                const appStoreResponse = await fetch(appStoreUrl);
+                if (!appStoreResponse.ok) throw new Error(`App Store заявка неуспешна: ${appStoreResponse.status}`);
+                const appStoreText = await appStoreResponse.text();
+                const appStoreDoc = new DOMParser().parseFromString(appStoreText, 'text/html');
+                const appStoreRows = appStoreDoc.querySelectorAll('table.table-ranking tbody tr');
+                let appStoreRank = 'Не е намерено';
+                appStoreRows.forEach((row, index) => {
+                    const appLink = row.querySelector('a[href*="/app/"]');
+                    const appName = appLink?.textContent.trim();
+                    if (appName && appName.toLowerCase().includes('coinbase')) {
+                        appStoreRank = index + 1;
+                        console.log(`Coinbase намерен в App Store на позиция: ${appStoreRank}`);
+                    }
+                });
+                document.getElementById('appStoreRank').innerText = appStoreRank;
+
+                // Google Play Store
+                console.log('Опит за заявка към Play Store...');
+                const playStoreResponse = await fetch(playStoreUrl);
+                if (!playStoreResponse.ok) throw new Error(`Play Store заявка неуспешна: ${playStoreResponse.status}`);
+                const playStoreText = await playStoreResponse.text();
+                const playStoreDoc = new DOMParser().parseFromString(playStoreText, 'text/html');
+                const playStoreRows = playStoreDoc.querySelectorAll('table.table-ranking tbody tr');
+                let playStoreRank = 'Не е намерено';
+                playStoreRows.forEach((row, index) => {
+                    const appLink = row.querySelector('a[href*="/app/"]');
+                    const appName = appLink?.textContent.trim();
+                    if (appName && appName.toLowerCase().includes('coinbase')) {
+                        playStoreRank = index + 1;
+                        console.log(`Coinbase намерен в Play Store на позиция: ${playStoreRank}`);
+                    }
+                });
+                document.getElementById('playStoreRank').innerText = playStoreRank;
+
+            } catch (error) {
+                console.error('Грешка:', error);
+                document.getElementById('appStoreRank').innerText = 'Грешка: ' + error.message;
+                document.getElementById('playStoreRank').innerText = 'Грешка: ' + error.message;
+            }
+        }
+
+        window.onload = getCoinbaseRankings;
+    </script>
+</body>
+</html>
