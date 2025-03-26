@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Store Rankings</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        table { width: 80%; margin: auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Класиране на Coinbase, Binance и Bybit в App Store</h1>
+    <button onclick="getRankings()">Обнови класациите</button>
+    <table>
+        <tr>
+            <th>Приложение</th>
+            <th>Ранк във "Финанси"</th>
+            <th>Ранк сред всички</th>
+        </tr>
+        <tr>
+            <td>Coinbase</td>
+            <td id="coinbase-finance">Зареждане...</td>
+            <td id="coinbase-all">Зареждане...</td>
+        </tr>
+        <tr>
+            <td>Binance</td>
+            <td id="binance-finance">Зареждане...</td>
+            <td id="binance-all">Зареждане...</td>
+        </tr>
+        <tr>
+            <td>Bybit</td>
+            <td id="bybit-finance">Зареждане...</td>
+            <td id="bybit-all">Зареждане...</td>
+        </tr>
+    </table>
+
+    <script>
+        async function getRankings() {
+            const rankings = {
+                "coinbase": { finance: "N/A", all: "N/A" },
+                "binance": { finance: "N/A", all: "N/A" },
+                "bybit": { finance: "N/A", all: "N/A" }
+            };
+
+            try {
+                // Взимаме топ 200 във финансите
+                const financeResponse = await fetch("https://rss.applemarketingtools.com/api/v2/us/apps/top-free/200/finance.json");
+                const financeData = await financeResponse.json();
+
+                // Взимаме топ 200 в общата класация
+                const allResponse = await fetch("https://rss.applemarketingtools.com/api/v2/us/apps/top-free/200/apps.json");
+                const allData = await allResponse.json();
+
+                // Функция за намиране на ранка на дадено приложение
+                function findRank(appId, data) {
+                    return data.feed.results.findIndex(app => app.id === appId) + 1 || "N/A";
+                }
+
+                // ID на приложенията в App Store
+                const appIds = {
+                    "coinbase": "886427730",
+                    "binance": "1436799971",
+                    "bybit": "1446204928"
+                };
+
+                // Намираме ранковете
+                for (const [key, id] of Object.entries(appIds)) {
+                    rankings[key].finance = findRank(id, financeData);
+                    rankings[key].all = findRank(id, allData);
+                }
+
+                // Обновяваме HTML-а
+                document.getElementById("coinbase-finance").innerText = rankings.coinbase.finance;
+                document.getElementById("coinbase-all").innerText = rankings.coinbase.all;
+                document.getElementById("binance-finance").innerText = rankings.binance.finance;
+                document.getElementById("binance-all").innerText = rankings.binance.all;
+                document.getElementById("bybit-finance").innerText = rankings.bybit.finance;
+                document.getElementById("bybit-all").innerText = rankings.bybit.all;
+
+            } catch (error) {
+                console.error("Грешка при извличане на данните", error);
+            }
+        }
+
+        // Извикваме функцията при зареждане на страницата
+        getRankings();
+    </script>
+</body>
+</html>
