@@ -3,85 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Store Rankings</title>
+    <title>Coinbase Класация</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-        }
-        h1 {
+            background-color: #f4f4f4;
             text-align: center;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        .loading {
-            color: #888;
-            text-align: center;
+        .rank {
+            font-size: 24px;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-    <h1>Класиране на приложения в App Store</h1>
-    <div id="rankings">
-        <p class="loading">Зареждане...</p>
+    <div class="container">
+        <h2>Coinbase Класация в Реално Време</h2>
+        <div class="rank">
+            <p>App Store (Финанси): <span id="appStoreRank">Зареждане...</span></p>
+            <p>Google Play Store (Финанси): <span id="playStoreRank">Зареждане...</span></p>
+        </div>
+        <p>Рефрешни страницата за актуални данни.</p>
     </div>
 
     <script>
-        // Примерен JavaScript, който ще извлече ранговете
-        async function fetchRankingData() {
-            // Тук ще добавим логика за скрапинг/извличане на данни
-            // Пример: Ще използваме фиктивни данни за тест
-            const rankings = {
-                "Coinbase": { "financeRank": 1, "overallRank": 5 },
-                "Binance": { "financeRank": 2, "overallRank": 10 },
-                "Bybit": { "financeRank": 3, "overallRank": 15 }
-            };
+        async function getCoinbaseRankings() {
+            try {
+                const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+                const appStoreUrl = corsProxy + 'https://www.appbrain.com/stats/appstore-rankings/top_free/finance/us';
+                const playStoreUrl = corsProxy + 'https://www.appbrain.com/stats/google-play-rankings/top_free/finance/us';
 
-            // Обновяваме страницата с данните
-            document.querySelector('.loading').style.display = 'none';
-            const table = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Приложение</th>
-                            <th>Ранк във "Финанси"</th>
-                            <th>Ранк сред всички</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Coinbase</td>
-                            <td>${rankings.Coinbase.financeRank}</td>
-                            <td>${rankings.Coinbase.overallRank}</td>
-                        </tr>
-                        <tr>
-                            <td>Binance</td>
-                            <td>${rankings.Binance.financeRank}</td>
-                            <td>${rankings.Binance.overallRank}</td>
-                        </tr>
-                        <tr>
-                            <td>Bybit</td>
-                            <td>${rankings.Bybit.financeRank}</td>
-                            <td>${rankings.Bybit.overallRank}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
-            document.getElementById('rankings').innerHTML = table;
+                // App Store
+                console.log('Опит за заявка към App Store...');
+                const appStoreResponse = await fetch(appStoreUrl);
+                if (!appStoreResponse.ok) throw new Error(`App Store заявка неуспешна: ${appStoreResponse.status}`);
+                const appStoreText = await appStoreResponse.text();
+                const appStoreDoc = new DOMParser().parseFromString(appStoreText, 'text/html');
+                const appStoreRows = appStoreDoc.querySelectorAll('table.table-ranking tbody tr');
+                let appStoreRank = 'Не е намерено';
+                appStoreRows.forEach((row, index) => {
+                    const appLink = row.querySelector('a[href*="/app/"]');
+                    const appName = appLink?.textContent.trim();
+                    if (appName && appName.toLowerCase().includes('coinbase')) {
+                        appStoreRank = index + 1;
+                        console.log(`Coinbase намерен в App Store на позиция: ${appStoreRank}`);
+                    }
+                });
+                document.getElementById('appStoreRank').innerText = appStoreRank;
+
+                // Google Play Store
+                console.log('Опит за заявка към Play Store...');
+                const playStoreResponse = await fetch(playStoreUrl);
+                if (!playStoreResponse.ok) throw new Error(`Play Store заявка неуспешна: ${playStoreResponse.status}`);
+                const playStoreText = await playStoreResponse.text();
+                const playStoreDoc = new DOMParser().parseFromString(playStoreText, 'text/html');
+                const playStoreRows = playStoreDoc.querySelectorAll('table.table-ranking tbody tr');
+                let playStoreRank = 'Не е намерено';
+                playStoreRows.forEach((row, index) => {
+                    const appLink = row.querySelector('a[href*="/app/"]');
+                    const appName = appLink?.textContent.trim();
+                    if (appName && appName.toLowerCase().includes('coinbase')) {
+                        playStoreRank = index + 1;
+                        console.log(`Coinbase намерен в Play Store на позиция: ${playStoreRank}`);
+                    }
+                });
+                document.getElementById('playStoreRank').innerText = playStoreRank;
+
+            } catch (error) {
+                console.error('Грешка:', error);
+                document.getElementById('appStoreRank').innerText = 'Грешка: ' + error.message;
+                document.getElementById('playStoreRank').innerText = 'Грешка: ' + error.message;
+            }
         }
 
-        // Зареждаме данните при отваряне на сайта
-        window.onload = fetchRankingData;
+        window.onload = getCoinbaseRankings;
     </script>
 </body>
 </html>
